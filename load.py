@@ -9,20 +9,20 @@ class Page():
 
 def load():
     data = []
-    reader = pypdf.PdfReader("tekst.pdf")
+    reader = pypdf.PdfReader("knjiga.pdf")
     for num, page in enumerate(reader.pages):
         trie = Trie()
-        text = page.extract_text().split(" ")
+        text = page.extract_text()
         word = ""
         index = 0
-        for i in len(text):
+        for i in range(len(text)):
             letter = text[i]
             if letter in [",", ".", ":", ";", "-"]:
                 continue
             elif letter == " ":
                 trie.add(word, index) 
                 index = i + 1
-                word = ""  
+                word = ""
             else:
                 word += letter
         page = Page(num + 1, text, trie)

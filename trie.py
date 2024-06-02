@@ -8,7 +8,7 @@ class Trie():
     def __init__(self):
         self.root = TrieNode(None)
 
-    def add(self, string, value):
+    def add(self, string, ordinal):
         current = self.root
         for char in string:
             exists = False
@@ -23,13 +23,13 @@ class Trie():
                 newnode = TrieNode(char)
                 current.children.append(newnode)
                 current = newnode
-        current.index.append(value)
+        current.index.append(ordinal)
 
     def search(self, string):
         current = self.root
         for char in string:
             exists = False
-            for child in current:
+            for child in current.children:
                 if child.value == char:
                     exists = True
                     current = child
