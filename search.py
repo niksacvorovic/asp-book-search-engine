@@ -8,12 +8,22 @@ class Result():
 
 def results(data, query):
     resultlist = []
+    querywords = query.split(" ")
     for page in data:
-        index = page.trie.search(query)
-        if index == None:
+        index = {}
+        value = 0
+        for word in querywords:
+            wordresult = page.trie.search(word)
+            if wordresult == None:
+                continue
+            else:
+                value += len(wordresult)
+                index[word] = wordresult
+        if index == {}:
             continue
         else:
-            value = len(index)
+            if len(index) > 1:
+                value *= 2
             result = Result(page, index, value)
             resultlist.append(result)
     return sortresults(resultlist)
@@ -34,5 +44,5 @@ def sortresults(list):
             equal.append(elem)
     sortedless = sortresults(less)
     sortedmore = sortresults(more)
-    sorted = sortedless + equal + sortedmore
+    sorted = sortedmore + equal + sortedless
     return sorted

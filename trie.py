@@ -38,4 +38,6 @@ class Trie():
                 continue
             else:
                 return None
+        if current.index == []:
+            return None
         return current.index

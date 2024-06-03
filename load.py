@@ -1,5 +1,6 @@
 import pypdf
 from trie import Trie
+import pickle
 
 class Page():
     def __init__(self, num, text, trie):
@@ -7,7 +8,13 @@ class Page():
         self.text = text
         self.trie = trie
 
-def load():
+def loadfile(filename):
+    file = open(filename, 'rb')
+    stream = pickle.load(file)
+    file.close()
+    return stream
+
+def loadpdf():
     data = []
     reader = pypdf.PdfReader("knjiga.pdf")
     for num, page in enumerate(reader.pages):
