@@ -19,14 +19,17 @@ def results(data, query):
             else:
                 value += len(wordresult)
                 index[word] = wordresult
-        if index == {}:
-            continue
-        else:
-            if len(index) > 1:
-                value *= 2
-            result = Result(page, index, value)
-            resultlist.append(result)
-    return sortresults(resultlist)
+        value *= len(index)
+        result = Result(page, index, value)
+        resultlist.append(result)
+    foundlist = []
+    for res in resultlist:
+        if res.value != 0:
+            res.value += len(res.page.refs)
+            for ref in res.page.refs:
+                res.value += resultlist[ref].value / 4
+            foundlist.append(res)
+    return sortresults(foundlist)
 
 def sortresults(list):
     if len(list) == 0 or len(list) == 1:
@@ -34,7 +37,7 @@ def sortresults(list):
     pivot = list[randint(0, len(list) - 1)]
     less = []
     more = []
-    equal = [pivot]
+    equal = []
     for elem in list:
         if pivot.value < elem.value:
             more.append(elem)
