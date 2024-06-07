@@ -18,6 +18,8 @@ def results(data, query):
             resultlist = logicsearch(data, querywords)
         except LogicException:
             print("Nepravilno unesen logički izraz!")
+    elif query[0] == "\"" and query[-1] == "\"":
+        resultlist = phrasesearch(data, query)
     else:
         resultlist = regsearch(data, querywords)
     foundlist = []
@@ -111,3 +113,35 @@ def logicsearch(data, querywords):
                     final.value += current.value
                     final.index.update(current.index)
     return finalresult
+
+def phrasesearch(data, query):
+    phrase = query[1:-1]
+    phrasewords = phrase.split(" ")
+    unfiltered = regsearch(data, phrasewords)
+    resultlist = []
+    for result in unfiltered:
+        if len(result.index) != len(phrasewords):
+            resultlist.append(Result(result.page, [], 0))
+        else:
+            finalset = set(result.index[phrasewords[0]])
+            current = ""
+            for word in phrasewords:
+                intersect = set()
+                for num in result.index[word]:
+                    check = num - len(current)
+                    intersect.add(check)
+                finalset = finalset.intersection(intersect)
+                current += word + " "
+                if len(finalset) == 0:
+                    resultlist.append(Result(result.page, [], 0))
+                    break
+            if len(finalset) != 0:
+                index = {}
+                index[phrase] = list(finalset)
+                value = len(finalset)
+                newresult = Result(result.page, index, value)
+                resultlist.append(newresult)
+    return resultlist
+            
+def autocomplete(query):
+    pass
