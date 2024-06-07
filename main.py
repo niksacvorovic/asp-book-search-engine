@@ -9,6 +9,7 @@ def main():
         data = loadpdf(argv[1] + ".pdf")
     elif argv[2] == "1":
         data = loadfile(argv[1] + ".pickle")
+    data = loadfile("knjiga.pickle")
     query = str(input("Unesite reč, više reči ili frazu za pretragu: "))
     searchresults = results(data, query)
     print("\nRezultati pretrage:\n ")

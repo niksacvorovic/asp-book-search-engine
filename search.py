@@ -1,4 +1,8 @@
 from random import randint
+from collections import deque
+
+class LogicException(Exception):
+    pass
 
 class Result():
     def __init__(self, page, index, value):
@@ -7,8 +11,45 @@ class Result():
         self.value = value
 
 def results(data, query):
-    resultlist = []
     querywords = query.split(" ")
+    resultlist = []
+    if ("AND" in querywords) or ("OR" in querywords) or ("NOT" in querywords):
+        try:
+            resultlist = logicsearch(data, querywords)
+        except LogicException:
+            print("Nepravilno unesen logički izraz!")
+    else:
+        resultlist = regsearch(data, querywords)
+    foundlist = []
+    for res in resultlist:
+        if res.value != 0:
+            res.value += len(res.page.refs)
+            for ref in res.page.refs:
+                res.value += resultlist[ref].value / 4
+            foundlist.append(res)
+    return sortresults(foundlist)
+
+def sortresults(resultlist):
+    if len(resultlist) == 0 or len(resultlist) == 1:
+        return resultlist
+    pivot = resultlist[randint(0, len(resultlist) - 1)]
+    less = []
+    more = []
+    equal = []
+    for elem in resultlist:
+        if pivot.value < elem.value:
+            more.append(elem)
+        elif pivot.value > elem.value:
+            less.append(elem)
+        else:
+            equal.append(elem)
+    sortedless = sortresults(less)
+    sortedmore = sortresults(more)
+    sorted = sortedmore + equal + sortedless
+    return sorted
+
+def regsearch(data, querywords):
+    resultlist = []
     for page in data:
         index = {}
         value = 0
@@ -22,30 +63,51 @@ def results(data, query):
         value *= len(index)
         result = Result(page, index, value)
         resultlist.append(result)
-    foundlist = []
-    for res in resultlist:
-        if res.value != 0:
-            res.value += len(res.page.refs)
-            for ref in res.page.refs:
-                res.value += resultlist[ref].value / 4
-            foundlist.append(res)
-    return sortresults(foundlist)
+    return resultlist
 
-def sortresults(list):
-    if len(list) == 0 or len(list) == 1:
-        return list
-    pivot = list[randint(0, len(list) - 1)]
-    less = []
-    more = []
-    equal = []
-    for elem in list:
-        if pivot.value < elem.value:
-            more.append(elem)
-        elif pivot.value > elem.value:
-            less.append(elem)
+def logicsearch(data, querywords):
+    wordgroups = []
+    logic = []
+    group = []
+    if querywords[0] in ["AND", "OR", "NOT"] or querywords[-1] in ["AND", "OR", "NOT"]:
+        raise LogicException()
+    for word in querywords:
+        if word in ["AND", "OR", "NOT"]:
+            logic.append(word)
+            wordgroups.append(group)
+            group = []
         else:
-            equal.append(elem)
-    sortedless = sortresults(less)
-    sortedmore = sortresults(more)
-    sorted = sortedmore + equal + sortedless
-    return sorted
+            group.append(word)
+    wordgroups.append(group)
+    if len(wordgroups) != len(logic) + 1:
+        raise LogicException()
+    searches = []
+    for query in wordgroups:
+        searches.append(regsearch(data, query))
+    finalresult = searches[0]
+    for i in range(len(logic)):
+        operator = logic[i]
+        operand = searches[i + 1]
+        if operator == "AND":
+            for j in range(len(operand)):
+                final = finalresult[j]
+                current = operand[j]
+                if final.value != 0 and current.value != 0:
+                    final.value += current.value
+                    final.index.update(current.index)
+                else:
+                    final.value = 0
+        elif operator == "NOT":
+            for j in range(len(operand)):
+                final = finalresult[j]
+                current = operand[j]
+                if current.value != 0:
+                    final.value = 0
+        else:
+            for j in range(len(operand)):
+                final = finalresult[j]
+                current = operand[j]
+                if current.value != 0:
+                    final.value += current.value
+                    final.index.update(current.index)
+    return finalresult
