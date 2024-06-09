@@ -3,9 +3,8 @@ from trie import Trie
 import pickle
 
 class Page():
-    def __init__(self, num, raw, text, trie, refs):
+    def __init__(self, num, text, trie, refs):
         self.num = num
-        self.raw = raw
         self.text = text
         self.trie = trie
         self.refs = refs
@@ -24,9 +23,9 @@ def loadpdf(filename):
         firstpage += 1
     for i in range(firstpage, reader.get_num_pages()):
         num = reader.page_labels[i]
-        raw = reader.pages[i]
+        page = reader.pages[i]
         trie = Trie()
-        text = raw.extract_text().lower()
+        text = page.extract_text().lower()
         word = ""
         index = 0
         for j in range(len(text)):
