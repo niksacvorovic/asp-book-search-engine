@@ -56,12 +56,12 @@ def regsearch(data, querywords):
         index = {}
         value = 0
         for word in querywords:
-            wordresult = page.trie.search(word)
+            wordresult = page.trie.search(word.lower())
             if wordresult == None:
                 continue
             else:
                 value += len(wordresult)
-                index[word] = wordresult
+                index[word.lower()] = wordresult
         value *= len(index)
         result = Result(page, index, value)
         resultlist.append(result)
@@ -79,7 +79,7 @@ def logicsearch(data, querywords):
             wordgroups.append(group)
             group = []
         else:
-            group.append(word)
+            group.append(word.lower())
     wordgroups.append(group)
     if len(wordgroups) != len(logic) + 1:
         raise LogicException()
@@ -142,38 +142,3 @@ def phrasesearch(data, query):
                 newresult = Result(result.page, index, value)
                 resultlist.append(newresult)
     return resultlist
-            
-def autocomplete(data, query):
-    completions = {}
-    def triedfs(suffix, node):
-        if node.children == []:
-            if suffix in completions:
-                completions[suffix] += 1
-            else:
-                completions[suffix] = 1
-        else:
-            for child in node.children:
-                triedfs(suffix + child.value, child)
-    for page in data:
-        current = page.trie.root
-        complete = False
-        for letter in query:
-            if letter == "*":
-                complete = True
-            exists = False
-            for child in current.children:
-                if child.value == letter:
-                    exists = True
-                    current = child
-                    break
-            if not exists:
-                break
-        if complete:
-            triedfs(query[:-1], current)
-        else:
-            continue
-    ret = []
-    for elem in completions:
-        if completions[elem] > 1:
-            ret.append(elem)
-    return ret

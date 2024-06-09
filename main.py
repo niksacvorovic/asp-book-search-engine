@@ -1,5 +1,6 @@
 from load import loadpdf, loadfile
-from search import results, autocomplete
+from search import results
+from queryfunctions import autocomplete, autocorrect
 from sys import setrecursionlimit, argv
 import pickle
 
@@ -47,6 +48,27 @@ def main():
                     except:
                         print("Neispravan unos! Pokušajte opet")
     searchresults = results(data, query)
+    if len(searchresults) < 2:
+        corrections = autocorrect(data, query)
+        if corrections != []:
+            print("Da li ste hteli da pretražite: ")
+            for i, word in enumerate(corrections):
+                print(str(i + 1) + ") " + word)
+            while True:
+                choose = str(input("Odaberite jednu od ponuđenih reči ili unesite x ako ipak želite da pretražite prvobitnu reč: "))
+                if choose == "x":
+                    break
+                else:
+                    try:
+                        arrayindex = int(choose) - 1
+                        if arrayindex >= 0 and arrayindex <= len(corrections):
+                            query = corrections[arrayindex]
+                            searchresults = results(data, query)
+                            break
+                        else:
+                            print("Neispravan unos! Pokušajte opet")
+                    except:
+                        print("Neispravan unos! Pokušajte opet")
     if searchresults == []:
         print("Za datu pretragu nema rezultata!")
     else:
