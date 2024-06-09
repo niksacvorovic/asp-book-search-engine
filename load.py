@@ -25,14 +25,12 @@ def loadpdf(filename):
         num = reader.page_labels[i]
         page = reader.pages[i]
         trie = Trie()
-        text = page.extract_text()
+        text = page.extract_text().lower()
         word = ""
         index = 0
         for j in range(len(text)):
             letter = text[j]
-            if letter in [",", ".", ":", ";", "-"]:
-                continue
-            elif letter == " ":
+            if letter in [",", ".", ":", ";", "-", "(", ")", " ", "\n"]:
                 trie.add(word, index) 
                 index = j + 1
                 word = ""
