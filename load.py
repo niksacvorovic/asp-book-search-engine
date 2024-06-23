@@ -1,4 +1,5 @@
 import pypdf
+import pymupdf
 from trie import Trie
 import pickle
 
@@ -53,3 +54,19 @@ def loadpdf(filename):
             page = Page(num, text, trie, refs)
         data.append(page)
     return data
+
+def save(searchresults):
+    filename = str(input("Unesite x ako želite da završite izvršavanje programa ili unesite naziv pod kojim " +
+                     "biste sačuvali fajl sa prvih 10 rezultata pretrage: "))
+    if filename == "x":
+        pass
+    else:
+        file = pymupdf.open()
+        for i in range(10):
+            if i >= len(searchresults):
+                break
+            page = file.new_page()
+            pagetext = searchresults[i].page.text
+            rectangle = pymupdf.Rect(50, 72, page.rect.width - 50, page.rect.height - 72)
+            insert = page.insert_textbox(rectangle, pagetext, fontsize = 10)
+        file.save(filename + ".pdf")

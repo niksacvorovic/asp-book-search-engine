@@ -1,4 +1,4 @@
-from load import loadpdf, loadfile
+from load import loadpdf, loadfile, save
 from search import results
 from queryfunctions import autocomplete, autocorrect
 from sys import setrecursionlimit, argv
@@ -91,6 +91,7 @@ def main():
                             print("Ovo je prva stranica! Unesite neku drugu opciju")
                     elif ask == "x":
                         print("___________________________KRAJ PRETRAGE_________________________________")
+                        save(searchresults)
                         file = open(argv[1] + ".pickle", 'wb')
                         pickle.dump(data, file)
                         file.close()
@@ -114,6 +115,7 @@ def main():
                     print("\n")
             i += 1
         print("___________________________KRAJ PRETRAGE_________________________________")
+    save(searchresults)
     file = open(argv[1] + ".pickle", 'wb')
     pickle.dump(data, file)
     file.close()
